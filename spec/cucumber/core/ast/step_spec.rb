@@ -1,13 +1,16 @@
 require 'cucumber/core/ast/step'
+require 'cucumber/core/ast/outline_step'
+require 'cucumber/core/ast/empty_multiline_argument'
+require 'gherkin/dialect'
 
 module Cucumber
   module Core
     module Ast
       describe Step do
         let(:step) do
-          node, language, location, comments, keyword, name = *double
+          location, keyword, name = *double
           multiline_arg = EmptyMultilineArgument.new
-          Step.new(node, language, location, comments, keyword, name, multiline_arg)
+          Step.new(location, keyword, name, multiline_arg)
         end
 
         describe "describing itself" do
@@ -26,7 +29,7 @@ module Cucumber
           end
 
           context "with a multiline argument" do
-            let(:step) { Step.new(double, double, double, double, double, double, multiline_arg) }
+            let(:step) { Step.new(double, double, double, multiline_arg) }
             let(:multiline_arg) { double }
 
             it "tells its multiline argument to describe itself" do
@@ -45,7 +48,7 @@ module Cucumber
         end
 
         describe "backtrace line" do
-          let(:step) { Step.new(double, double, "path/file.feature:10", double, "Given ", "this step passes", double) }
+          let(:step) { Step.new("path/file.feature:10", "Given ", "this step passes", double) }
 
           it "knows how to form the backtrace line" do
             expect( step.backtrace_line ).to eq("path/file.feature:10:in `Given this step passes'")
@@ -54,14 +57,17 @@ module Cucumber
         end
 
         describe "actual keyword" do
-          let(:language) { ::Gherkin::I18n.get('en') }
+          let(:language) { ::Gherkin::Dialect.for('en') }
 
           context "for keywords 'given', 'when' and 'then'" do
-            let(:given_step) { Step.new(double, language, double, double, "Given ", double, double) }
-            let(:when_step) { Step.new(double, language, double, double, "When ", double, double) }
-            let(:then_step) { Step.new(double, language, double, double, "Then ", double, double) }
+            let(:given_step) { Step.new(double, "Given ", double, double) }
+            let(:when_step) { Step.new(double, "When ", double, double) }
+            let(:then_step) { Step.new(double, "Then ", double, double) }
 
             it "returns the keyword itself" do
+              given_step.language = language
+              when_step.language = language
+              then_step.language = language
               expect( given_step.actual_keyword(nil) ).to eq("Given ")
               expect( when_step.actual_keyword(nil) ).to eq("When ")
               expect( then_step.actual_keyword(nil) ).to eq("Then ")
@@ -69,12 +75,15 @@ module Cucumber
           end
 
           context "for keyword 'and', 'but', and '*'" do
-            let(:and_step) { Step.new(double, language, double, double, "And ", double, double) }
-            let(:but_step) { Step.new(double, language, double, double, "But ", double, double) }
-            let(:asterisk_step) { Step.new(double, language, double, double, "* ", double, double) }
+            let(:and_step) { Step.new(double, "And ", double, double) }
+            let(:but_step) { Step.new(double, "But ", double, double) }
+            let(:asterisk_step) { Step.new(double, "* ", double, double) }
 
             context "when the previous step keyword exist" do
               it "returns the previous step keyword" do
+                and_step.language = language
+                but_step.language = language
+                asterisk_step.language = language
                 expect( and_step.actual_keyword("Then ") ).to eq("Then ")
                 expect( but_step.actual_keyword("Then ") ).to eq("Then ")
                 expect( asterisk_step.actual_keyword("Then ") ).to eq("Then ")
@@ -83,6 +92,9 @@ module Cucumber
 
             context "when the previous step keyword does not exist" do
               it "returns the 'given' keyword" do
+                and_step.language = language
+                but_step.language = language
+                asterisk_step.language = language
                 expect( and_step.actual_keyword(nil) ).to eq("Given ")
                 expect( but_step.actual_keyword(nil) ).to eq("Given ")
                 expect( asterisk_step.actual_keyword(nil) ).to eq("Given ")
@@ -92,10 +104,11 @@ module Cucumber
           end
 
           context "for i18n languages" do
-            let(:language) { ::Gherkin::I18n.get('en-lol') }
-            let(:and_step) { Step.new(double, language, double, double, "AN ", double, double) }
+            let(:language) { ::Gherkin::Dialect.for('en-lol') }
+            let(:and_step) { Step.new(double, "AN ", double, double) }
 
             it "returns the keyword in the correct language" do
+              and_step.language = language
               expect( and_step.actual_keyword(nil) ).to eq("I CAN HAZ ")
             end
           end
@@ -105,10 +118,10 @@ module Cucumber
       describe ExpandedOutlineStep do
         let(:outline_step) { double }
         let(:step) do
-          node, language, location, keyword, name = *double
-          comments = []
+          language, location, keyword, name = *double
           multiline_arg = EmptyMultilineArgument.new
-          ExpandedOutlineStep.new(outline_step, node, language, location, comments, keyword, name, multiline_arg)
+          comments = []
+          ExpandedOutlineStep.new(outline_step, language, location, comments, keyword, name, multiline_arg)
         end
 
         describe "describing itself" do
@@ -127,7 +140,7 @@ module Cucumber
           end
 
           context "with a multiline argument" do
-            let(:step) { ExpandedOutlineStep.new(double, double, double, double, double, double, double, multiline_arg) }
+            let(:step) { Step.new(double, double, double, multiline_arg) }
             let(:multiline_arg) { double }
 
             it "tells its multiline argument to describe itself" do
@@ -156,8 +169,8 @@ module Cucumber
         end
 
         describe "backtrace line" do
-          let(:outline_step) { OutlineStep.new(double, double, "path/file.feature:5", double, "Given ", "this step <state>", double) }
-          let(:step) { ExpandedOutlineStep.new(outline_step, double, double, "path/file.feature:10", double, "Given ", "this step passes", double) }
+          let(:outline_step) { OutlineStep.new("path/file.feature:5", "Given ", "this step <state>", double) }
+          let(:step) { ExpandedOutlineStep.new(outline_step, double, "path/file.feature:10", double, "Given ", "this step passes", double) }
 
           it "includes the outline step in the backtrace line" do
             expect( step.backtrace_line ).to eq("path/file.feature:10:in `Given this step passes'\n" +

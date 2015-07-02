@@ -11,7 +11,7 @@ module Cucumber
         include HasLocation
         include DescribesItself
 
-        def initialize(location:, tags:, keyword:, name:, description: "", header:, example_rows:)
+        def initialize(location, tags, keyword, name, description, header, example_rows)
           @location = location
           @tags = tags
           @keyword = keyword
@@ -23,6 +23,10 @@ module Cucumber
 
         attr_reader :location, :tags, :keyword,
                     :header, :example_rows
+
+        def language(language)
+          children.each { |row| row.language = language }
+        end
 
         private
 
@@ -38,19 +42,20 @@ module Cucumber
           include HasLocation
 
           attr_reader :comments
+          attr_accessor :language
 
-          def initialize(cells, location, comments)
+          def initialize(cells, location)
             @cells = cells
             @location = location
-            @comments = comments
+            @comments = []
           end
 
           def values
             @cells
           end
 
-          def build_row(row_cells, number, location, language, comments)
-            Row.new(Hash[@cells.zip(row_cells)], number, location, language, comments)
+          def build_row(row_cells, number, location)
+            Row.new(Hash[@cells.zip(row_cells)], number, location)
           end
 
           def inspect
@@ -62,15 +67,15 @@ module Cucumber
           include DescribesItself
           include HasLocation
 
-          attr_reader :number, :language, :comments
+          attr_reader :number, :comments
+          attr_accessor :language
 
-          def initialize(data, number, location, language, comments)
+          def initialize(data, number, location)
             raise ArgumentError, data.to_s unless data.is_a?(Hash)
             @data = data
             @number = number
             @location = location
-            @language = language
-            @comments = comments
+            @comments = []
           end
 
           def ==(other)

@@ -11,19 +11,19 @@ module Cucumber
         include HasLocation
         include DescribesItself
 
-        attr_reader :language, :location, :background,
-                    :tags, :keyword,
+        attr_reader :location, :background,
+                    :comments, :tags, :keyword,
                     :description, :raw_steps
         private :raw_steps
 
-        def initialize(language: "TODO", location:, tags:, keyword:, name:, description: "", steps:)
-          @language          = language
+        def initialize(location, tags, keyword, name, description, steps)
           @location          = location
           @tags              = tags
           @keyword           = keyword
           @name              = name
           @description       = description
           @raw_steps         = steps
+          @comments = []
         end
 
         def children
@@ -38,6 +38,10 @@ module Cucumber
           sexp += tags if tags.any?
           sexp += step_invocations.to_sexp if step_invocations.any?
           sexp
+        end
+
+        def language(language)
+          children.each { |step| step.language = language }
         end
 
         private

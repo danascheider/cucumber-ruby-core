@@ -12,12 +12,11 @@ module Cucumber
 
         MissingExamples = Class.new(StandardError)
 
-        attr_reader :language, :tags, :keyword,
+        attr_reader :comments, :tags, :keyword,
                     :steps, :examples_tables, :line
-        private :language, :line
+        private :line
 
-        def initialize(language: "TODO", location:, tags:, keyword:, name:, description: "", steps:, examples:)
-          @language          = language
+        def initialize(location, tags, keyword, name, description, steps, examples)
           @location          = location
           @tags              = tags
           @keyword           = keyword
@@ -25,6 +24,11 @@ module Cucumber
           @description       = description
           @steps             = steps
           @examples_tables   = examples
+          @comments = []
+        end
+
+        def language(language)
+          children.each { |child| child.language(language) }
         end
 
         private

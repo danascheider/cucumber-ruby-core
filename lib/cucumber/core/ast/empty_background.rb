@@ -6,6 +6,9 @@ module Cucumber
           self
         end
 
+        def language(*)
+        end
+
         def inspect
           "#<#{self.class.name}>"
         end

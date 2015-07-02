@@ -10,19 +10,25 @@ module Cucumber
         include HasLocation
         include DescribesItself
 
-        attr_reader :language, :location, :comments, :keyword, :name, :multiline_arg
+        attr_reader :location, :comments, :keyword, :name, :multiline_arg
 
-        def initialize(language, location, comments, keyword, name, multiline_arg)
-          @language, @location, @comments, @keyword, @name, @multiline_arg = language, location, comments, keyword, name, multiline_arg
+        def initialize(location, keyword, text, multiline_arg)
+          @location, @keyword, @name, @multiline_arg = location, keyword, text, multiline_arg
+          @language = nil
+          @comments = []
         end
 
         def to_step(row)
-          Ast::ExpandedOutlineStep.new(self, gherkin_statement, language, row.location, comments, keyword, row.expand(name), replace_multiline_arg(row))
+          Ast::ExpandedOutlineStep.new(self, @language, row.location, comments, keyword, row.expand(name), replace_multiline_arg(row))
         end
 
         def inspect
           keyword_and_name = [keyword, name].join(": ")
           %{#<#{self.class} "#{keyword_and_name}" (#{location})>}
+        end
+
+        def language(language)
+          @language = language
         end
 
         private

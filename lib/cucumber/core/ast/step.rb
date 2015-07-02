@@ -8,10 +8,12 @@ module Cucumber
         include HasLocation
         include DescribesItself
 
-        attr_reader :keyword, :name, :language, :comments, :exception, :multiline_arg
+        attr_reader :keyword, :name, :comments, :exception, :multiline_arg
+        attr_accessor :language
 
-        def initialize(language, location, comments, keyword, name, multiline_arg)
-          @language, @location, @comments, @keyword, @name, @multiline_arg = language, location, comments, keyword, name, multiline_arg
+        def initialize(location, keyword, name, multiline_arg)
+          @location, @keyword, @name, @multiline_arg = location, keyword, name, multiline_arg
+          @comments = []
         end
 
         def to_sexp
@@ -23,9 +25,9 @@ module Cucumber
         end
 
         def actual_keyword(previous_step_keyword = nil)
-          if [language.keywords('and'), language.keywords('but')].flatten.uniq.include? keyword
+          if [language.and, language.but].flatten.uniq.include? keyword
             if previous_step_keyword.nil?
-              language.keywords('given').reject{|kw| kw == '* '}[0]
+              language.given.reject{|kw| kw == '* '}[0]
             else
               previous_step_keyword
             end
@@ -52,8 +54,8 @@ module Cucumber
 
       class ExpandedOutlineStep < Step
 
-        def initialize(outline_step, gherkin_statement, language, location, comments, keyword, name, multiline_arg)
-          @outline_step, @gherkin_statement, @language, @location, @comments, @keyword, @name, @multiline_arg = outline_step, gherkin_statement, language, location, comments, keyword, name, multiline_arg
+        def initialize(outline_step, language, location, comments, keyword, name, multiline_arg)
+          @outline_step, @language, @location, @comments, @keyword, @name, @multiline_arg = outline_step, language, location, comments, keyword, name, multiline_arg
         end
 
         alias :self_match_locations? :match_locations?
