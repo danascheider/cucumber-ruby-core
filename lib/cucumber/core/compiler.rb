@@ -4,10 +4,13 @@ require 'cucumber/core/test/step'
 module Cucumber
   module Core
 
-    # Compiles the AST into test cases
+    # The ++Compiler++ compiles the AST into test cases.
+
     class Compiler
       attr_reader :receiver
       private     :receiver
+
+      # The Compiler is intialized with a ++Report++ object passed as ++receiver++. 
 
       def initialize(receiver)
         @receiver = receiver
@@ -18,6 +21,9 @@ module Cucumber
         feature.describe_to(compiler)
         self
       end
+
+      # The ++done++ method calls ++done++ on the ++@receiver++ object, which is
+      # a ++Report++ object.
 
       def done
         receiver.done
