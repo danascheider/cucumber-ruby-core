@@ -1,5 +1,16 @@
 module Cucumber
   module Core
+
+    # A ++Report++ is how you find out what is happening during your test run.
+    # As the test cases and steps are executed, messages are sent to the report.
+    #
+    # A ++Report++ needs to respond to the following methods:
+    #   * ++before_test_case(test_case)++
+    #   * ++after_test_case(test_case, result)++
+    #   * ++ before_test_step(test_step)++
+    #   * ++ after_test_step(test_step, result)++
+    #   * ++done++
+    
     module Report
       class Summary
         attr_reader :test_cases, :test_steps
