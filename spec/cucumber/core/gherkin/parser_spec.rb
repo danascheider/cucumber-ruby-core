@@ -15,7 +15,7 @@ module Cucumber
         end
 
         context "for invalid gherkin" do
-          let(:source) { Gherkin::Document.new(path, 'not gherkin') }
+          let(:source) { Gherkin::Document.new(path, "\nnot gherkin\n\nFeature: \n") }
           let(:path)   { 'path_to/the.feature' }
 
           it "raises an error" do
@@ -116,19 +116,48 @@ module Cucumber
           end
         end
 
-        context "a Scenario with a Comment" do
+        context "a feature file with a comments on different levels" do
           source do
+            comment 'feature comment'
             feature do
-              comment 'wow'
-              scenario
+              comment 'scenario comment'
+              scenario do
+                comment 'step comment'
+                step
+              end
+              comment 'scenario outline comment'
+              scenario_outline do
+                comment 'outline step comment'
+                step
+                comment 'examples comment'
+                examples do
+                  row
+                  row
+                end
+              end
             end
           end
 
-          it "parses the comment into the AST" do
+          it "the comments are distibuted to down the ast tree from the feature" do
             visitor = double
-            allow( visitor ).to receive(:feature).and_yield(visitor)
+            expect( visitor ).to receive(:feature) do |feature|
+              expect( feature.comments.join ).to eq "# feature comment"
+              visitor
+            end.and_yield(visitor)
             expect( visitor ).to receive(:scenario) do |scenario|
-              expect( scenario.comments.join ).to eq "# wow"
+              expect( scenario.comments.join ).to eq "  # scenario comment"
+            end.and_yield(visitor)
+            expect( visitor ).to receive(:step) do |step|
+              expect( step.comments.join ).to eq "    # step comment"
+            end.and_yield(visitor)
+            expect( visitor ).to receive(:scenario_outline) do |scenario_outline|
+              expect( scenario_outline.comments.join ).to eq "  # scenario outline comment"
+            end.and_yield(visitor)
+            expect( visitor ).to receive(:outline_step) do |outline_step|
+              expect( outline_step.comments.join ).to eq "    # outline step comment"
+            end.and_yield(visitor)
+            expect( visitor ).to receive(:examples_table) do |examples_table|
+              expect( examples_table.comments.join ).to eq "    # examples comment"
             end
             feature.describe_to(visitor)
           end

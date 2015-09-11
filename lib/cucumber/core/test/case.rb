@@ -1,4 +1,5 @@
 require 'cucumber/core/test/result'
+require 'cucumber/core/gherkin/tag_expression'
 
 module Cucumber
   module Core
@@ -55,9 +56,8 @@ module Cucumber
           @tags ||= TagCollector.new(self).result
         end
 
-        require 'gherkin/tag_expression'
         def match_tags?(*expressions)
-          ::Gherkin::TagExpression.new(expressions.flatten).evaluate(tags.map {|t| ::Gherkin::Formatter::Model::Tag.new(t.name, t.line) })
+          Cucumber::Core::Gherkin::TagExpression.new(expressions.flatten).evaluate(tags)
         end
 
         def match_name?(name_regexp)

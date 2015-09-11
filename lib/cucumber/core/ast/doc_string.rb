@@ -25,8 +25,8 @@ module Cucumber
 
         attr_reader :content_type, :content
 
-        def initialize(string, content_type, location)
-          @content = string
+        def initialize(content, content_type, location)
+          @content = content
           @content_type = content_type
           @location = location
           super @content

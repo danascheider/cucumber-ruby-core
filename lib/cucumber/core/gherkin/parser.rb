@@ -1,5 +1,8 @@
+require 'gherkin3/parser'
+require 'gherkin3/token_scanner'
+require 'gherkin3/errors'
 require 'cucumber/core/gherkin/ast_builder'
-require 'gherkin/parser/parser'
+require 'cucumber/core/ast'
 
 module Cucumber
   module Core
@@ -15,13 +18,18 @@ module Cucumber
         end
 
         def document(document)
-          builder = AstBuilder.new(document.uri)
-          parser = ::Gherkin::Parser::Parser.new(builder, true, "root", false)
+          parser  = ::Gherkin3::Parser.new
+          scanner = ::Gherkin3::TokenScanner.new(document.body)
+          core_builder = AstBuilder.new(document.uri)
+
+          if document.body.strip.empty?
+            return receiver.feature Ast::NullFeature.new
+          end
 
           begin
-            parser.parse(document.body, document.uri, 0)
-            builder.language = parser.i18n_language
-            receiver.feature builder.result
+            result = parser.parse(scanner)
+
+            receiver.feature core_builder.feature(result)
           rescue *PARSER_ERRORS => e
             raise Core::Gherkin::ParseError.new("#{document.uri}: #{e.message}")
           end
@@ -34,16 +42,8 @@ module Cucumber
 
         private
 
-        PARSER_ERRORS = if Cucumber::JRUBY
-                          [
-                            ::Java::GherkinLexer::LexingError
-                          ]
-                        else
-                          [
-                            ::Gherkin::Lexer::LexingError,
-                            ::Gherkin::Parser::ParseError,
-                          ]
-                        end
+        PARSER_ERRORS = ::Gherkin3::ParserError
+
       end
     end
   end

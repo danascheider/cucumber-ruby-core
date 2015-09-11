@@ -1,6 +1,7 @@
 require 'cucumber/core/ast/describes_itself'
 require 'cucumber/core/ast/names'
 require 'cucumber/core/ast/location'
+require 'gherkin3/dialect'
 
 module Cucumber
   module Core
@@ -11,12 +12,11 @@ module Cucumber
         include HasLocation
         include DescribesItself
 
-        attr_reader :gherkin_statement, :language, :location, :background,
+        attr_reader :language, :location, :background,
                     :comments, :tags, :keyword, :description,
                     :feature_elements
 
-        def initialize(gherkin_statement, language, location, background, comments, tags, keyword, name, description, feature_elements)
-          @gherkin_statement = gherkin_statement
+        def initialize(language, location, background, comments, tags, keyword, name, description, scenario_definitions)
           @language = language
           @location = location
           @background = background
@@ -25,7 +25,7 @@ module Cucumber
           @keyword = keyword
           @name = name
           @description = description
-          @feature_elements = feature_elements
+          @feature_elements = scenario_definitions
         end
 
         def children
@@ -34,7 +34,7 @@ module Cucumber
 
         def short_name
           first_line = name.split(/\n/)[0]
-          if first_line =~ /#{language.keywords('feature')}:(.*)/
+          if first_line =~ /#{language.feature_keywords}:(.*)/
             $1.strip
           else
             first_line
@@ -63,6 +63,16 @@ module Cucumber
       class NullFeature
         def method_missing(*args, &block)
           self
+        end
+      end
+
+      require 'delegate'
+      class LanguageDelegator < SimpleDelegator
+        attr_reader :iso_code
+
+        def initialize(iso_code, obj)
+          super(obj)
+          @iso_code = iso_code
         end
       end
     end

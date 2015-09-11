@@ -1,8 +1,20 @@
-## [In Git](https://github.com/cucumber/cucumber-ruby-core/compare/v1.2.0...master)
+## [In Git](https://github.com/cucumber/cucumber-ruby-core/compare/v1.3.0...master)
+
+### New Features
+
+### Bugfixes
+
+## [v1.3.0](https://github.com/cucumber/cucumber-ruby-core/compare/v1.2.0...v1.3.0)
 
 ### New Features
 
  * Add factory method to Cucumber::Core::Ast::Location that uses the output from Proc#source_location (@brasmusson)
+ * Integrate Gherkin3 parser (@brassmusson)
+
+### Bugfixes
+
+ * Make sure that `after_test_step` is sent also when a test step is interrupted by (a timeout in) an around hook ([cucumber/cucumber-ruby#909](https://github.com/cucumber/cucumber-ruby/issues/909) @brasmusson)
+ * Improve the check that a test_step quacks like a Cucumber::Core::Test::Step ([95](https://github.com/cucumber/cucumber-ruby-core/issues/95) @brasmusson)
 
 ## [v1.2.0](https://github.com/cucumber/cucumber-ruby-core/compare/v1.1.3...v1.2.0)
 
@@ -70,7 +82,7 @@
 
 ### Bugfixes
 
- * Handle empty feature files (#[77](https://github.com/cucumber/cucumber-ruby-core/pull/77), [cucumber/cucumber#771](https://github.com/cucumber/cucumber/issues/771) [@brasmusson](https://github.com/brasmusson))
+ * Handle empty feature files (#[77](https://github.com/cucumber/cucumber-ruby-core/pull/77), [cucumber/cucumber-ruby#771](https://github.com/cucumber/cucumber-ruby/issues/771) [@brasmusson](https://github.com/brasmusson))
  * Run after hooks in reverse order (#[69](https://github.com/cucumber/cucumber-ruby-core/pull/69) [@erran](https://github.com/erran))
 
 ## [v1.0.0.beta.3](https://github.com/cucumber/cucumber-ruby-core/compare/v1.0.0.beta.2...v1.0.0.beta.3)
